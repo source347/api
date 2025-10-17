@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐶 API Data Visualizer: Random Dog Generator</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f4f8;
+            color: #333;
+            text-align: center;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 500px;
+        }
+
+        h1 {
+            color: #007bff;
+            margin-bottom: 20px;
+        }
+
+        #dogImage {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            min-height: 250px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 4px solid #ccc;
+            /* Placeholder background for initial load/error */
+            background-color: #e0e0e0;
+            transition: opacity 0.5s;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.1em;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .loading-message {
+            color: #555;
+            font-style: italic;
+            margin-top: 10px;
+            height: 20px; /* Reserve space */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🐕 Random Dog Photo Generator</h1>
+        <p>Click the button to fetch a new adorable dog picture from the Dog CEO API.</p>
+
+        <img id="dogImage" src="" alt="A random dog photo will appear here." />
+
+        <button id="fetchButton">Get a New Dog!</button>
+        <div id="statusMessage" class="loading-message">Click the button to begin!</div>
+    </div>
+
+    <script>
+        const dogImage = document.getElementById('dogImage');
+        const fetchButton = document.getElementById('fetchButton');
+        const statusMessage = document.getElementById('statusMessage');
+        const API_URL = 'https://dog.ceo/api/breeds/image/random';
+
+        /**
+         * Fetches a random dog image URL from the Dog CEO API and updates the page.
+         */
+        async function fetchRandomDog() {
+            // 1. Set status to loading and disable the button
+            statusMessage.textContent = 'Fetching a new friend...';
+            fetchButton.disabled = true;
+            dogImage.style.opacity = '0.5'; // Fade the current image
+
+            try {
+                // 2. Fetch the data asynchronously
+                const response = await fetch(API_URL);
+
+                // Check if the network request was successful (HTTP status 200-299)
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // 3. Parse the JSON response
+                const data = await response.json();
+                
+                // The API structure is { "message": "url_to_image", "status": "success" }
+                const imageUrl = data.message;
+
+                // 4. Update the image source and alt text
+                dogImage.src = imageUrl;
+                dogImage.alt = 'A random dog photo from the Dog CEO API.';
+
+                // 5. Update status
+                statusMessage.textContent = 'New dog loaded successfully!';
+                dogImage.style.opacity = '1'; // Show the new image
+
+            } catch (error) {
+                // 6. Handle any errors (network failure, JSON parsing, API structure issues)
+                console.error('Error fetching the dog photo:', error);
+                statusMessage.textContent = '❌ Error fetching dog photo. Check console or network.';
+                dogImage.src = ''; // Clear image on error
+                dogImage.alt = 'Error loading image.';
+
+            } finally {
+                // 7. Re-enable the button regardless of success or failure
+                fetchButton.disabled = false;
+            }
+        }
+
+        // Add event listener to the button
+        fetchButton.addEventListener('click', fetchRandomDog);
+
+        // Optional: Load an initial dog photo when the page first loads
+        fetchRandomDog();
+    </script>
+
+</body>
+</html>
